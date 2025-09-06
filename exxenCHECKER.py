@@ -6,12 +6,6 @@ from colorama import init, Fore, Style
 
 init()
 
-def display_banner():
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print(Fore.MAGENTA + "EXXEN CHECKER v1.0" + Style.RESET_ALL)
-    print(Fore.YELLOW + "Author: @layznxw7 | Telegram: @PythonWebCheckers" + Style.RESET_ALL)
-    print()
-
 class ExxenChecker:
     def __init__(self):
         self.session = requests.Session()
@@ -71,8 +65,7 @@ class ExxenChecker:
             return {'ok': False, 'msg': f'Error: {str(e)}'}
 
 def main():
-    display_banner()
-    path = input(Fore.CYAN + "Enter combo file path: " + Style.RESET_ALL).strip()
+    path = input("Combo file path: ").strip()
     if not os.path.isfile(path):
         print(Fore.RED + "File not found!" + Style.RESET_ALL)
         return
@@ -101,4 +94,4 @@ def main():
                 f.write(f"{combo} | {result['msg']}\n")
 
 if __name__ == "__main__":
-    main()
+    main()                
