@@ -75,7 +75,7 @@ def check(username, pasw):
         
         if '"ip"' in result or 'ip_block' in result:
             
-return  
+                        return  
         os.system('cls' if os.name == 'nt' else 'clear')
         print(f"{Fore.WHITE}json: {result}\n")
 
