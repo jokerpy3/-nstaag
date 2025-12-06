@@ -1,13 +1,4 @@
-import requests
-import os
-from mechanize import Browser
-from user_agent import generate_user_agent
-from concurrent.futures import ThreadPoolExecutor
-import random
-class Mes:
-    def __init__(mes):
-        mes.r1 = 0
-        mes.r2 = 0
+
         mes.r3 = 0
         mes.r4 = 0
         mes.uaid = '5294cb15462e4cdca3e36aacafb140c5'
